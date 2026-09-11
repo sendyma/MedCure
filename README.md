@@ -190,9 +190,6 @@ dinov2/              vendored DINOv2 (image tower only)
 
 ## Reference
 
-Built on [CXR-CLIP](https://github.com/Soombit-ai/cxr-clip) and
-[DINOv2](https://github.com/facebookresearch/dinov2).
-
 ```bibtex
 @inproceedings{xu2026cit,
    title={MedCure: Medical Data Curation for Efficient Vision-Language Pretraining},
