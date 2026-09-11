@@ -130,7 +130,7 @@ training rows. Corpora marked `Synthetic_Report` carry reports generated from
 their label sets rather than radiologist prose.
 
 The evaluation loaders assume a few fixed sub-directory layouts under each
-corpus root: MIMIC-CXR ground truth in `2.0.0/yulequan/`, TBX11K lists in
+corpus root: MIMIC-CXR ground truth in `2.0.0/metadata/`, TBX11K lists in
 `lists/` with images in `imgs/`, CheXpert test images in `CheXpert/test`, and
 VinDr PNGs in `train_png/` / `test_png/`.
 
