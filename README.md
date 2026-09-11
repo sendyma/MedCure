@@ -1,6 +1,6 @@
 # MedCure: Medical Data Curation for Efficient Vision-Language Pretraining
 
-MedCure pre-trains a CLIP-style chest X-ray (CXR) model while it selects its own
+MedCure pre-trains a CLIP-style medical foundation model while it selects its own
 training data. Instead of filtering the corpus offline, the first epoch scores
 every batch with a **graph-density** criterion, trains on the informative
 fraction it keeps, and then freezes that subset. Every later epoch trains
