@@ -15,31 +15,22 @@ image-report pairs in total.
 ![MedCure](fig/demo.png)
 
 **(a)** Both towers embed a batch; the concatenated image-text embeddings form
-the candidate set `S`, out of which curation keeps the subset `B`.
+the candidate super-batch `S`, out of which curation keeps the mini-batch `B`.
 **(b)** Scoring — a candidate's density adds the contribution `H_j0` of each of
 its `n_neighbor` nearest neighbours, weighted by `exp(-e_0j * gamma_forward)`
 where `e_0j` is the distance between the two.
 **(c)** Selection — once `x_0` is taken, every neighbour is damped by
-`P_0j = exp(-e_0j * gamma_reverse) * density(x_0)`, which is what keeps the kept
-batch from collapsing onto one region.
+`P_0j = exp(-e_0j * gamma_reverse) * density(x_0)`, which is what prevents the kept
+samples from collapsing onto one region.
 
 **Stage 0 — alignment warm-up.** Curation ranks a pair by how badly its two
-modalities disagree, `1 - cos(image, text)`. At initialisation that number is
-noise: the towers share no space yet, so the ranking would be arbitrary. So the
+modalities disagree, `1 - cos(image, text)`. The
 run first trains with the plain contrastive loss on a random
-`align_warmup_ratio` slice of the pool (5% by default, ~1.6% of all optimizer
-steps) to establish a preliminary cross-modal alignment. No selection happens
+`align_warmup_ratio` slice of the pool (5% by default) to establish a preliminary cross-modal alignment. No selection happens
 here — every pair in the batch contributes to the loss.
 
-The slice is drawn with a fixed-seed CPU generator, so every rank picks the same
-one without communicating. Three choices here are deliberate: it gets a **single
-pass**, it uses the **same `lr`** and the same global cosine schedule as the rest
-of the run, and it is **not excluded** from the pool that stage 1 curates over —
-the warm-up is about the model's state, not about spending a data budget. Those
-samples do not enter the curated subset.
-
 **Stage 1 — curate + pre-train (epoch 0).** Iterate the full pool. For each
-globally-gathered batch:
+globally-gathered super-batch:
 
 1. Score each pair by how *badly* the two modalities already agree,
    `s_i = 1 - cos(image_i, text_i)`.
@@ -53,10 +44,7 @@ globally-gathered batch:
 5. The contrastive loss is computed over the chosen pairs only.
 
 The union of everything chosen is the curated subset, written to
-`subset.json`. Because each step keeps exactly
-`int(curation_ratio * batch_size * world_size)` pairs and a `DistributedSampler`
-never repeats within an epoch, the subset size is exactly
-`curation_ratio * len(dataset)`.
+`subset.json`. 
 
 **Stage 2 — pre-train on the frozen subset (remaining epochs).** The subset is
 broadcast from rank 0 (so every rank agrees), wrapped in a
@@ -66,11 +54,8 @@ in the batch contributes to the loss.
 Two consequences worth knowing before you compare runs:
 
 - Optimizer steps drop, because stage-2 epochs are `curation_ratio` as long.
-  The LR cosine horizon covers all three stages and is computed up front
-  (`planned steps: ...` in the log), not from `epochs * len(loader)`.
 - In-batch negatives jump between stages — `curation_ratio * B` in stage 1
-  versus the full `B` afterwards. Expect a visible step in `Loss_ctr` at the
-  epoch 0 → 1 boundary; it is the InfoNCE baseline shifting, not divergence.
+  versus the full `B` afterwards. 
 
 ## Architecture
 
@@ -81,7 +66,7 @@ Two consequences worth knowing before you compare runs:
 | Projections | Linear, 512-d, on both towers |
 | Objective | Symmetric InfoNCE with a learnable logit scale (init `1/temperature`) |
 
-Features are gathered across ranks with a gradient-preserving all-gather, so the
+Features are gathered across ranks with a gradient-preserving all-gather, so the actual
 contrastive batch is `batch_size * world_size`.
 
 ## Setup
@@ -96,8 +81,7 @@ the Hugging Face hub.
 
 ## Data
 
-Every corpus hangs off one root, so pointing the code at your own copies is a
-single environment variable — it covers both the training corpora
+Every corpus covers both the training corpora
 ([`constants.py`](constants.py)) and the evaluation sets
 ([`evaluation/dataset_catalog.json`](evaluation/dataset_catalog.json), whose
 paths are stored relative to it):
@@ -136,16 +120,12 @@ VinDr PNGs in `train_png/` / `test_png/`.
 
 ## Configuration
 
-Every hyper-parameter is a class attribute on `Config` in
-[`configs.py`](configs.py) — there are no hyper-parameters buried in the model
-or training code, and no YAML. An experiment is a function in
-[`run_configs.py`](run_configs.py) returning a `Config` with its overrides; the
-function name selects it and names the output directory.
+Every hyper-parameter is a class attribute on `Config` in [`configs.py`](configs.py).
 
 ```python
 # run_configs.py
 def medcure_r10():
-    return Config(curation_ratio=0.10, epochs=10)
+    return Config(curation_ratio=0.25, epochs=10)
 ```
 
 `CXRClip.from_config(args)` reads exactly the keys in `CXRClip.CONFIG_KEYS`, so
@@ -158,8 +138,7 @@ python -m main --config_name medcure          # all visible GPUs, DDP via mp.spa
 sbatch run.sh                                 # SLURM (edit the header for your cluster)
 ```
 
-`main.py` spawns one process per visible GPU; there is no `torchrun`. It also
-copies the source files next to the checkpoints so a run stays reproducible.
+`main.py` spawns one process per visible GPU.
 
 Each run directory contains:
 
@@ -209,16 +188,16 @@ dinov2/              vendored DINOv2 (image tower only)
 
 ## Reference
 
-Built on [SLIP](https://github.com/facebookresearch/SLIP) and
+Built on [CXR-CLIP](https://github.com/Soombit-ai/cxr-clip) and
 [DINOv2](https://github.com/facebookresearch/dinov2).
 
 ```bibtex
-@inproceedings{xu2023cit,
-   title={CiT: Curation in Training for Effective Vision-Language Data},
+@inproceedings{xu2026cit,
+   title={MedCure: Medical Data Curation for Efficient Vision-Language Pretraining},
    author={Hu Xu and Saining Xie and Po-Yao Huang and Licheng Yu and Russell Howes
            and Gargi Ghosh and Luke Zettlemoyer and Christoph Feichtenhofer},
-   journal={arXiv preprint arXiv:2301.02241},
-   year={2023}
+   journal={IEEE TIP},
+   year={2026}
 }
 ```
 
