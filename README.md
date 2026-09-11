@@ -69,6 +69,9 @@ Two consequences worth knowing before you compare runs:
 Features are gathered across ranks with a gradient-preserving all-gather, so the actual
 contrastive batch is `batch_size * world_size`.
 
+## Pretrained Model
+Our pretrained models with curated subset are [here](https://drive.google.com/drive/folders/18xf3sg29A4GUccH1kbqvuZcQ8RcfW6qn?usp=drive_link).
+
 ## Setup
 
 ```bash
