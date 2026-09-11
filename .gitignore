@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+
+# run outputs
+runs/
+runs0.*/
+wandb/
+slurm-*.out
+*.pth
+
+# vendored / downloaded weights
+pretrained_models/
+huggingface/
