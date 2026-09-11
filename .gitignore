@@ -3,7 +3,6 @@ __pycache__/
 
 # run outputs
 runs/
-runs0.*/
 wandb/
 slurm-*.out
 *.pth
