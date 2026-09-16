@@ -191,12 +191,12 @@ dinov2/              vendored DINOv2 (image tower only)
 ## Reference
 
 ```bibtex
-@inproceedings{xu2026cit,
-   title={MedCure: Medical Data Curation for Efficient Vision-Language Pretraining},
-   author={Hu Xu and Saining Xie and Po-Yao Huang and Licheng Yu and Russell Howes
-           and Gargi Ghosh and Luke Zettlemoyer and Christoph Feichtenhofer},
-   journal={IEEE TIP},
-   year={2026}
+@article{wang2026medcure,
+  title={MedCure: Medical Data Curation for Efficient Vision-Language Pretraining},
+  author={Wang, Chong and Liu, Fengbei and Liu, Yuyuan and Chen, Yuanhong and Tian, Yu and Fang, Leyuan},
+  journal={IEEE Transactions on Image Processing},
+  year={2026},
+  publisher={IEEE}
 }
 ```
 
