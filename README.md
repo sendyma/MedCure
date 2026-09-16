@@ -1,4 +1,4 @@
-# [MedCure](https://ieeexplore.ieee.org/document/11689675): Medical Data Curation for Efficient Vision-Language Pretraining
+# [MedCure](https://ieeexplore.ieee.org/document/11689675): Medical Data Curation for Efficient Vision-Language Pretraining (IEEE TIP 2026)
 
 MedCure pre-trains a CLIP-style medical foundation model while it selects its own
 training data. Instead of filtering the corpus offline, the first epoch scores
